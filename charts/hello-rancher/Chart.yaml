@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: "1.0.2"
+
+name: hello-rancher
+description: Desafio JackExperts Week3
+
+icon: https://br.linkedin.com/company/jackexperts/?trk=organization-update_share-update_actor-text
+
+type: application
+
+version: 0.1.0
+

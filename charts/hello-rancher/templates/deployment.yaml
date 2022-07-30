@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hello-rancher.fullname" . }}
+  labels:
+    {{- include "hello-rancher.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hello-rancher.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.pod.annotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hello-rancher.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.pod.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hello-rancher.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.pod.securityContext | nindent 8 }}
+      
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.container.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ports:
+            - name: http
+              containerPort: {{ .Values.container.port }}
+              protocol: {{ .Values.container.protocol }}
+
+          resources:
+            {{- toYaml .Values.container.resources | nindent 12 }}
+
+          {{- if .Values.probe.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probe.liveness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probe.liveness.initialDelay }}
+            successThreshold: {{ .Values.probe.liveness.successThreshold }}
+            failureThreshold: {{ .Values.probe.liveness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.liveness.period }}
+          {{- end }}
+          {{- if .Values.probe.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probe.readiness.path }}
+              port: http
+            initialDelaySeconds: {{ .Values.probe.readiness.initialDelay }}
+            successThreshold: {{ .Values.probe.readiness.successThreshold }}
+            failureThreshold: {{ .Values.probe.readiness.failureThreshold }}
+            periodSeconds: {{ .Values.probe.readiness.period }}
+          {{- end }}
+          {{- if .Values.probe.startup.enabled }}
+          startupProbe:
+            httpGet:
+              path: {{ .Values.probe.startup.path }}
+              port: http
+            successThreshold: {{ .Values.probe.startup.successThreshold }}
+            failureThreshold: {{ .Values.probe.startup.failureThreshold }}
+            periodSeconds: {{ .Values.probe.startup.period }}
+          {{- end }}
+      {{- with .Values.pod.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pod.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pod.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

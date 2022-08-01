@@ -1,9 +1,10 @@
-# Repositorio Chart Hello Rancher
+# Chart Hello Rancher
 
 ## JackExperts - Kubernetes para estagiarios - Fase 3
 
 
 ## Parâmetros
+
 
 | Nome                                           | Descrição                                                                                         | Valor                           |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------- |
